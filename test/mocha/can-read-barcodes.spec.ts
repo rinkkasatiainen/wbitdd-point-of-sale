@@ -1,7 +1,7 @@
 import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import {AddItemWithBarcode} from '../../src/actions/addItem'
+import {AddItemWithBarcode} from '../../src/domain/actions/addItem'
 import {Item, NoItemFound, Stock} from '../../src/repository/stock'
 import {LCDDisplay} from '../../src/domain/output/LCDDisplay'
 

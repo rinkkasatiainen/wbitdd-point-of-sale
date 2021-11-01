@@ -1,5 +1,5 @@
-import {LCDDisplay} from '../domain/output/LCDDisplay'
-import {Item, NoItemFound, Stock} from '../repository/stock'
+import {LCDDisplay} from '../output/LCDDisplay'
+import {Item, NoItemFound, Stock} from '../../repository/stock'
 
 export interface AddItem {
     onReadBarcode: (barCode: string) => Promise<void>;
