@@ -12,7 +12,7 @@ export class AddItemWithBarcode implements AddItem {
     }
 
     public async onReadBarcode(barCode: string): Promise<void> {
-        const item = await this.stock.findItem(barCode)
+        const item = await this.stock.findItem()
 
         await this.display.addPrice(item.price)
     }
