@@ -43,7 +43,7 @@ describe('AddItemWithBarcode', () => {
     })
 
     it('gets and item and sends the price to display', async () => {
-        const addItem = new AddItemWithBarcode(display, stock)
+        const addItem = new AddItemWithBarcode(display, fakeStock.on('123\n').returns(item))
 
         await addItem.onReadBarcode('123\n')
 
