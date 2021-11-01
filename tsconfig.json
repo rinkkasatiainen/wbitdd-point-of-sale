@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "target": "es2019",
+    "module": "commonjs",
+    "strict": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+
+    "declaration": true,
+    "removeComments": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "es6"
+    ],
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": ".",
+    "baseUrl": "."
+  },
+  "include": [
+    ".",
+    "./src/**/*.ts",
+    "./test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+  ]
+}
