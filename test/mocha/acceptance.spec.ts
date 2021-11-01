@@ -2,7 +2,7 @@ import chai, {expect} from 'chai'
 import sinonChai from 'sinon-chai'
 import {LCDDisplay} from '../../src/domain/output/LCDDisplay'
 import {AddItem, AddItemWithBarcode} from '../../src/domain/actions/addItem'
-import {NoItemFound, Stock} from '../../src/repository/stock'
+import {NoItemFound, Stock} from '../../src/domain/repository/stock'
 
 chai.use(sinonChai)
 
