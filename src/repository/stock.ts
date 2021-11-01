@@ -6,5 +6,5 @@ export class NoItemFound {
 }
 
 export interface Stock {
-    findItem: (barcode: string) => Promise<Item>;
+    findItem: (barcode: string) => Promise<Item | NoItemFound>;
 }

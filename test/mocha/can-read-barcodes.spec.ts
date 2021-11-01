@@ -2,7 +2,7 @@ import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import {AddItemWithBarcode} from '../../src/actions/addItem'
-import {Item, Stock} from '../../src/repository/stock'
+import {Item, NoItemFound, Stock} from '../../src/repository/stock'
 import {LCDDisplay} from '../../src/domain/output/LCDDisplay'
 
 chai.use(sinonChai)
@@ -15,10 +15,32 @@ const stock: Stock = {
     },
 }
 
-const display: LCDDisplay = {
-    addPrice: sinon.spy(),
+const fakeStock: {
+    on: (barcode: string) => ({
+        returns: (x: Item | NoItemFound) => Stock;
+    });
+} = {
+
+    on: (barcode => ({
+        returns: (resultFoundInStock) => ({
+            findItem(actual) {
+                if (barcode === actual) {
+                    return Promise.resolve(resultFoundInStock)
+                }
+                throw new Error('mismatch in expectations')
+            },
+        }),
+    })),
 }
+
 describe('AddItemWithBarcode', () => {
+    let display: LCDDisplay
+
+    beforeEach(() => {
+        display = {
+            addPrice: sinon.spy(),
+        }
+    })
 
     it('gets and item and sends the price to display', async () => {
         const addItem = new AddItemWithBarcode(display, stock)
@@ -28,4 +50,14 @@ describe('AddItemWithBarcode', () => {
         expect(display.addPrice).to.have.been.calledWith('1,89€')
     })
 
+    it('when there are no items', async () => {
+
+        const noItemFound = new NoItemFound();
+
+        const addItem = new AddItemWithBarcode(display, fakeStock.on('321\n').returns(noItemFound))
+
+        await addItem.onReadBarcode('321\n')
+
+        expect(display.addPrice).to.not.have.been.called
+    })
 })
