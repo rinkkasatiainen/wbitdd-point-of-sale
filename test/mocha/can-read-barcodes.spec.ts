@@ -9,11 +9,6 @@ chai.use(sinonChai)
 const item: Item = {
     price: '1,89€',
 }
-const stock: Stock = {
-    findItem() {
-        return Promise.resolve(item)
-    },
-}
 
 const fakeStock: {
     on: (barcode: string) => ({
@@ -52,7 +47,7 @@ describe('AddItemWithBarcode', () => {
 
     it('when there are no items', async () => {
 
-        const noItemFound = new NoItemFound();
+        const noItemFound = new NoItemFound()
 
         const addItem = new AddItemWithBarcode(display, fakeStock.on('321\n').returns(noItemFound))
 
