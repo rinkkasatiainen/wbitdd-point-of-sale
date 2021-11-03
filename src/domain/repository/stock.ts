@@ -1,12 +1,12 @@
 export interface Item {
-    price: string;
+    asString: () => string;
 }
 
-export class NoItemFound {
-    public price: string;
+export class NoItemFound implements Item{
+    public asString: () => string;
 
     public constructor(barcode: string) {
-        this.price = `Product not found: ${barcode}`
+        this.asString = () => `Product not found: ${barcode}`
     }
 }
 

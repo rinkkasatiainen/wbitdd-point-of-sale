@@ -7,7 +7,7 @@ import {LCDDisplay} from '../../src/domain/output/LCDDisplay'
 
 chai.use(sinonChai)
 const item: Item = {
-    price: '1,89€',
+    asString: () => '1,89€',
 }
 
 const fakeStock: {

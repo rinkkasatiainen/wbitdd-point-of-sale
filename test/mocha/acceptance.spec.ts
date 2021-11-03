@@ -23,7 +23,7 @@ class TestSpecificLCDDisplay implements LCDDisplay {
 const stock: Stock = {
     findItem: (barcode: string) => {
         if (barcode === '12345') {
-            return Promise.resolve({price: '10,50€'})
+            return Promise.resolve({asString: () => '10,50€'})
         }
         return Promise.resolve(new NoItemFound(barcode))
     },
