@@ -22,10 +22,10 @@ class TestSpecificLCDDisplay implements LCDDisplay {
 
 const stock: Stock = {
     findItem: (barcode: string) => {
-        if (barcode === '12345\n') {
+        if (barcode === '12345') {
             return Promise.resolve({price: '10,50€'})
         }
-        return Promise.resolve(new NoItemFound())
+        return Promise.resolve(new NoItemFound(barcode))
     },
 }
 
@@ -34,7 +34,7 @@ describe('Point of Sale system', () => {
         const lcdDisplay: TestSpecificLCDDisplay = new TestSpecificLCDDisplay()
         const onReadBarcode: AddItem = new AddItemWithBarcode(lcdDisplay, stock)
 
-        await onReadBarcode.onReadBarcode('12345\n')
+        await onReadBarcode.onReadBarcode('12345')
 
         const expected = lcdDisplay.lastCall()
         expect(expected).to.eql('10,50€')
@@ -44,10 +44,10 @@ describe('Point of Sale system', () => {
         const lcdDisplay = new TestSpecificLCDDisplay()
         const onReadBarcode = new AddItemWithBarcode(lcdDisplay, stock)
 
-        await onReadBarcode.onReadBarcode('54321\n')
+        await onReadBarcode.onReadBarcode('54321')
 
         const expected = lcdDisplay.lastCall()
-        expect(expected).to.eql(notCalledEver)
+        expect(expected).to.eql("Product not found: 54321")
     })
 })
 

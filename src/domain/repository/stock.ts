@@ -3,6 +3,11 @@ export interface Item {
 }
 
 export class NoItemFound {
+    public price: string;
+
+    public constructor(barcode: string) {
+        this.price = `Product not found: ${barcode}`
+    }
 }
 
 export interface Stock {

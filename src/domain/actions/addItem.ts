@@ -15,8 +15,10 @@ export class AddItemWithBarcode implements AddItem {
         const item: Item | NoItemFound = await this.stock.findItem(barCode)
 
         if (item instanceof NoItemFound) {
+            await this.display.addPrice(item.price)
             return
+        } else {
+            await this.display.addPrice(item.price)
         }
-        await this.display.addPrice(item.price)
     }
 }

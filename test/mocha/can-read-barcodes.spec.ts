@@ -38,21 +38,21 @@ describe('AddItemWithBarcode', () => {
     })
 
     it('gets and item and sends the price to display', async () => {
-        const addItem = new AddItemWithBarcode(display, fakeStock.on('123\n').returns(item))
+        const addItem = new AddItemWithBarcode(display, fakeStock.on('123').returns(item))
 
-        await addItem.onReadBarcode('123\n')
+        await addItem.onReadBarcode('123')
 
         expect(display.addPrice).to.have.been.calledWith('1,89€')
     })
 
     it('when there are no items', async () => {
 
-        const noItemFound = new NoItemFound()
+        const noItemFound = new NoItemFound('321')
 
-        const addItem = new AddItemWithBarcode(display, fakeStock.on('321\n').returns(noItemFound))
+        const addItem = new AddItemWithBarcode(display, fakeStock.on('321').returns(noItemFound))
 
-        await addItem.onReadBarcode('321\n')
+        await addItem.onReadBarcode('321')
 
-        expect(display.addPrice).to.not.have.been.called
+        expect(display.addPrice).to.have.been.calledWith('Product not found: 321')
     })
 })
