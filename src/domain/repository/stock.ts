@@ -11,5 +11,5 @@ export class NoItemFound implements Item{
 }
 
 export interface Stock {
-    findItem: (barcode: string) => Promise<Item | NoItemFound>;
+    findItem: (barcode: string) => Promise<Item>;
 }

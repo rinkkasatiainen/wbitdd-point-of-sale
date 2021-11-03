@@ -1,5 +1,5 @@
 import {LCDDisplay} from '../output/LCDDisplay'
-import {Item, NoItemFound, Stock} from '../repository/stock'
+import {Item, Stock} from '../repository/stock'
 
 export interface AddItem {
     onReadBarcode: (barCode: string) => Promise<void>;
@@ -12,7 +12,7 @@ export class AddItemWithBarcode implements AddItem {
     }
 
     public async onReadBarcode(barCode: string): Promise<void> {
-        const item: Item | NoItemFound = await this.stock.findItem(barCode)
+        const item: Item  = await this.stock.findItem(barCode)
 
         await this.display.addPrice(item.asString())
     }

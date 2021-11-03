@@ -47,7 +47,7 @@ describe('Point of Sale system', () => {
         await onReadBarcode.onReadBarcode('54321')
 
         const expected = lcdDisplay.lastCall()
-        expect(expected).to.eql("Product not found: 54321")
+        expect(expected).to.eql('Product not found: 54321')
     })
 })
 
