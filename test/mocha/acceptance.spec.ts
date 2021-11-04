@@ -20,17 +20,20 @@ class TestSpecificLCDDisplay implements LCDDisplay {
     }
 }
 
-const stock: Stock = {
-    findItem: (barcode: string) => {
-        if (barcode === '12345') {
-            return Promise.resolve({asString: () => '10,50€'})
-        }
-        return Promise.resolve(new NoItemFound(barcode))
-    },
-}
+const fakeStockWith: (barcodesByPrice: Record<string, string>) => Stock =
+    (barcodesByPrice) => ({
+        findItem: (barcode: string) => {
+            if (barcode in barcodesByPrice) {
+                return Promise.resolve({asString: () => barcodesByPrice[barcode]})
+            }
+            return Promise.resolve(new NoItemFound(barcode))
+        },
+    })
+
 
 describe('Point of Sale system', () => {
     it('should print the price in the LCD', async () => {
+        const stock = fakeStockWith({12345: '10,50€'})
         const lcdDisplay: TestSpecificLCDDisplay = new TestSpecificLCDDisplay()
         const onReadBarcode: AddItem = new AddItemWithBarcode(lcdDisplay, stock)
 
@@ -41,6 +44,7 @@ describe('Point of Sale system', () => {
     })
 
     it('should not print the price of an iteM that is not found', async () => {
+        const stock = fakeStockWith({12345: '10.45'})
         const lcdDisplay = new TestSpecificLCDDisplay()
         const onReadBarcode = new AddItemWithBarcode(lcdDisplay, stock)
 
