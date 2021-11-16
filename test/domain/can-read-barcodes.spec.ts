@@ -114,7 +114,7 @@ describe('AddItemWithBarcode', () => {
             expect(display.addTotal).to.not.have.been.called
         })
 
-        it('shows error, if no products', async () => {
+        it('shows error, if only product is not found', async () => {
             const addItem = new AddItemWithBarcode(display, fakeStock(), sale)
 
             await addItem.onReadBarcode('123')
@@ -144,14 +144,23 @@ describe('AddItemWithBarcode', () => {
 
                 expect(display.addTotal).to.have.been.calledWith('TOTAL: 12,00€')
             })
+            it('sums up the total even if entry not found', async () => {
+                const stock = fakeStock().on('123').returns(item123).on('234').returns(item234)
+                const addItem = new AddItemWithBarcode(display, stock, sale)
+
+                await addItem.onReadBarcode('123')
+                await addItem.onReadBarcode('98765')
+                await addItem.onReadBarcode('234')
+
+                sale.total()
+
+                expect(display.addTotal).to.have.been.calledWith('TOTAL: 12,00€')
+            })
         })
     })
 
     // 0, 1, many, ∞, 💥
-    it('should print total even if one item is not found')
     it('can be possible to override price of an item')
-    it('pressing total when no items read, should not do a thing')
-    it('when empty barcode!')
     it('should notify if product is not found')
 
 })
