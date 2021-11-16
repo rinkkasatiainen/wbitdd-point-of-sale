@@ -2,8 +2,9 @@ import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import { AddItemWithBarcode } from '../../src/domain/actions/addItem'
-import { Item, NoItemFound, Stock, EmptyBarCode } from '../../src/domain/repository/stock'
+import { EmptyBarCode, Item, NoItemFound, Stock } from '../../src/domain/repository/stock'
 import { ListensToSaleEvents } from '../../src/domain/output/ListensToSaleEvents'
+import { Sale } from '../../src/domain/sale'
 
 chai.use(sinonChai)
 
@@ -49,7 +50,7 @@ describe('AddItemWithBarcode', () => {
                 price: () => 1.89,
                 asString: () => '1,89€',
             }
-            const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(item))
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(item), new Sale(display))
 
             await addItem.onReadBarcode('123')
 
@@ -60,7 +61,7 @@ describe('AddItemWithBarcode', () => {
 
             const noItemFound = new NoItemFound('321')
 
-            const addItem = new AddItemWithBarcode(display, fakeStock().on('321').returns(noItemFound))
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('321').returns(noItemFound), new Sale(display))
 
             await addItem.onReadBarcode('321')
 
@@ -68,7 +69,8 @@ describe('AddItemWithBarcode', () => {
         })
 
         it('displays EmptyBarCodeError', async () => {
-            const addItem = new AddItemWithBarcode(display, fakeStock())
+            // eslint-disable-next-line no-undef
+            const addItem = new AddItemWithBarcode(display, fakeStock(), new Sale(display))
 
             await addItem.onReadBarcode('')
 
@@ -84,7 +86,7 @@ describe('AddItemWithBarcode', () => {
                 price: () => 10.90,
                 asString: () => '10,90€',
             }
-            const addItem = new AddItemWithBarcode(display, getStock(foundItem))
+            const addItem = new AddItemWithBarcode(display, getStock(foundItem), new Sale(display))
 
             await addItem.onReadBarcode('123')
             addItem.total()
@@ -94,10 +96,10 @@ describe('AddItemWithBarcode', () => {
 
         it('with another product', async () => {
             const foundItem: Item = {
-                price: () => 10.95,
-                asString: () => '10,95€',
+                price: () => 10.05,
+                asString: () => '10,05€',
             }
-            const addItem = new AddItemWithBarcode(display, getStock(foundItem))
+            const addItem = new AddItemWithBarcode(display, getStock(foundItem), new Sale(display))
 
             await addItem.onReadBarcode('123')
             addItem.total()
@@ -106,7 +108,7 @@ describe('AddItemWithBarcode', () => {
         })
 
         it('shows error, if no products', () => {
-            const addItem = new AddItemWithBarcode(display, fakeStock())
+            const addItem = new AddItemWithBarcode(display, fakeStock(), new Sale(display))
 
             addItem.total()
 
@@ -125,7 +127,7 @@ describe('AddItemWithBarcode', () => {
             }
             it('sums up the total', async () => {
                 const stock = fakeStock().on('123').returns(item123).on('234').returns(item234)
-                const addItem = new AddItemWithBarcode(display, stock)
+                const addItem = new AddItemWithBarcode(display, stock, new Sale(display))
 
                 await addItem.onReadBarcode('123')
                 await addItem.onReadBarcode('234')

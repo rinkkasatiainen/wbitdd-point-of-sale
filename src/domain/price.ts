@@ -1,11 +1,14 @@
-export class Price {
-    public readonly cents: number
-    public readonly euros: number
-    public readonly centsStr: string
+interface IPrice {
+    plus: (other: Price) => Price;
+    asString: () => string;
+}
+
+export class Price implements IPrice{
+    private readonly cents: number
+    private readonly euros: number
 
     public constructor(price: number) {
         this.cents = (price * 100) % 100
-        this.centsStr = this.cents.toPrecision(2).split('.').join('')
         this.euros = this.getEuros(price)
     }
 
@@ -15,7 +18,16 @@ export class Price {
         return new Price(euros + cents)
     }
 
+    public asString(): string {
+        let centsStr = `${(this.cents.toPrecision(2))}`
+        if (this.cents < 10){
+            centsStr = `0${this.cents.toPrecision(1)}`
+        }
+        return `${this.euros},${centsStr}`
+    }
+
     private getEuros(price: number) {
         return ((price * 100) - this.cents) / 100
     }
+
 }

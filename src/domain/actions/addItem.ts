@@ -15,8 +15,8 @@ export interface Result<L, R> {
 export class AddItemWithBarcode implements AddItem {
     private sale: Sale
 
-    public constructor(listensToSaleEvents: ListensToSaleEvents, private readonly stock: Stock) {
-        this.sale = new Sale(listensToSaleEvents)
+    public constructor(listensToSaleEvents: ListensToSaleEvents, private readonly stock: Stock, sale: Sale) {
+        this.sale = sale
     }
 
     public async onReadBarcode(barCode: string) {

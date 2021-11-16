@@ -3,11 +3,13 @@ import sinonChai from 'sinon-chai'
 import { ListensToSaleEvents } from '../../src/domain/output/ListensToSaleEvents'
 import { AddItem, AddItemWithBarcode } from '../../src/domain/actions/addItem'
 import { Item, NoItemFound, Stock } from '../../src/domain/repository/stock'
+import { Sale } from '../../src/domain/sale'
 
 chai.use(sinonChai)
 const notCalledEver = '-1.999€'
 
 class TestSpecificLCDDisplay implements ListensToSaleEvents {
+    public total = ''
     private lastPrice: string = notCalledEver
 
     public lastCall() {
@@ -23,6 +25,7 @@ class TestSpecificLCDDisplay implements ListensToSaleEvents {
     }
 
     public addTotal(total: string): void {
+        this.total = total
     }
 }
 
@@ -46,7 +49,7 @@ describe('Point of Sale system', () => {
     it('should print the price in the LCD', async () => {
         const stock = fakeStockWith({ 12345: getItem(10.50, '10,50€') })
         const lcdDisplay: TestSpecificLCDDisplay = new TestSpecificLCDDisplay()
-        const onReadBarcode: AddItem = new AddItemWithBarcode(lcdDisplay, stock)
+        const onReadBarcode: AddItem = new AddItemWithBarcode(lcdDisplay, stock, new Sale(lcdDisplay))
 
         await onReadBarcode.onReadBarcode('12345')
 
@@ -57,7 +60,7 @@ describe('Point of Sale system', () => {
     it('should not print the price of an iteM that is not found', async () => {
         const stock = fakeStockWith({ 12345: getItem(10.50, '10,50€') })
         const lcdDisplay = new TestSpecificLCDDisplay()
-        const onReadBarcode = new AddItemWithBarcode(lcdDisplay, stock)
+        const onReadBarcode = new AddItemWithBarcode(lcdDisplay, stock, new Sale(lcdDisplay))
 
         await onReadBarcode.onReadBarcode('54321')
 
@@ -72,20 +75,21 @@ describe('Point of Sale system', () => {
                 {
                     12345: getItem(10.50, '10,50€'),
                     23456: getItem(1.40, '1,40€'),
-                    34567: getItem(17.15, '17,05€'),
+                    34567: getItem(17.15, '17,15€'),
                 },
             )
             const lcdDisplay = new TestSpecificLCDDisplay()
-            const onReadBarcode = new AddItemWithBarcode(lcdDisplay, stock)
+            const sale = new Sale(lcdDisplay)
+
+            const onReadBarcode = new AddItemWithBarcode(lcdDisplay, stock, sale)
 
             await onReadBarcode.onReadBarcode('12345')
             await onReadBarcode.onReadBarcode('23456')
             await onReadBarcode.onReadBarcode('34567')
 
-            // const pointOfSale
-            // const expected = await pointOfSale.total()
+            sale.total()
 
-            // expect(expected).to.eql('Product not found: 54321')
+            expect(lcdDisplay.total).to.eql('TOTAL: 29,05€')
         })
 
 

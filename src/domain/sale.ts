@@ -26,14 +26,13 @@ export class Sale {
         if (this.prices.length === 0) {
             this.listensToSaleEvents.addError('No Scanned Products')
         } else {
-            const { euros, centsStr } = this.calculateTotal()
-            this.listensToSaleEvents.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
+            const price = this.calculateTotal()
+            this.listensToSaleEvents.addTotal(`TOTAL: ${price.asString()}€`)
         }
     }
 
     private calculateTotal() {
-        const t = this.prices.reduce((p, curr) => p.plus(curr), new Price(0))
-        return { euros: t.euros, centsStr: t.centsStr }
+        return this.prices.reduce((p, curr) => p.plus(curr), new Price(0))
     }
 }
 
