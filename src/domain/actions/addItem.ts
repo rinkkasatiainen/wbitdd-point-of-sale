@@ -20,9 +20,11 @@ function isError<T extends BarCodeReadErrorType>(result: any): result is BarCode
 export class AddItemWithBarcode implements AddItem {
     // TODO: Not really a display, but something that plays role of 'I want to know when an item is added'
     private items: Item[]
+    private sale: Sale
 
     public constructor(private readonly display: ListensToSaleEvents, private readonly stock: Stock) {
         this.items = []
+        this.sale = new Sale([])
     }
 
     public async onReadBarcode(barCode: string) {
@@ -30,6 +32,8 @@ export class AddItemWithBarcode implements AddItem {
         if (isError<BarCodeReadErrorType.EmptyBarcode>(item)) {
             this.display.addError('Empty barcode')
         } else {
+            this.sale.add(item)
+
             this.items.push(item)
             await this.display.addPrice(item.asString())
         }
@@ -40,13 +44,13 @@ export class AddItemWithBarcode implements AddItem {
             this.display.addError('No Scanned Products')
 
         } else {
-            const { euros, centsStr } = new Something(this.items).getMoney()
+            const { euros, centsStr } = this.sale.getMoney()
             this.display.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
         }
     }
 }
 
-class Something {
+class Sale {
     private readonly prices: Price[]
 
     public constructor(public readonly items: Item[]) {
@@ -56,6 +60,10 @@ class Something {
     public getMoney( ){
         const t = this.prices.reduce ( (p, curr) => p.plus(curr), new Price(0))
         return { euros: t.euros, centsStr: t.centsStr }
+    }
+
+    public add(item: Item) {
+        this.prices.push( new Price(item.price()))
     }
 }
 
