@@ -4,7 +4,6 @@ import { Sale } from '../sale'
 
 export interface AddItem {
     onReadBarcode: (barCode: string) => Promise<void>;
-    total: () => void;
 }
 
 export class AddItemWithBarcode implements AddItem {
@@ -17,10 +16,6 @@ export class AddItemWithBarcode implements AddItem {
     public async onReadBarcode(barCode: string) {
         const item = await this.stock.findItem(barCode)
         await this.sale.add(item)
-    }
-
-    public total() {
-        this.sale.total()
     }
 }
 

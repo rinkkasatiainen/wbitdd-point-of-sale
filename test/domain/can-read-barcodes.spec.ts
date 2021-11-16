@@ -40,8 +40,10 @@ function getDisplay(): ListensToSaleEvents {
 
 describe('AddItemWithBarcode', () => {
     let display: ListensToSaleEvents
+    let sale: Sale
     beforeEach(() => {
         display = getDisplay()
+        sale = new Sale(display)
     })
 
     describe('Reading barcodes', () => {
@@ -50,7 +52,7 @@ describe('AddItemWithBarcode', () => {
                 price: () => 1.89,
                 asString: () => '1,89€',
             }
-            const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(item), new Sale(display))
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(item), sale)
 
             await addItem.onReadBarcode('123')
 
@@ -61,7 +63,7 @@ describe('AddItemWithBarcode', () => {
 
             const noItemFound = new NoItemFound('321')
 
-            const addItem = new AddItemWithBarcode(display, fakeStock().on('321').returns(noItemFound), new Sale(display))
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('321').returns(noItemFound), sale)
 
             await addItem.onReadBarcode('321')
 
@@ -70,7 +72,7 @@ describe('AddItemWithBarcode', () => {
 
         it('displays EmptyBarCodeError', async () => {
             // eslint-disable-next-line no-undef
-            const addItem = new AddItemWithBarcode(display, fakeStock(), new Sale(display))
+            const addItem = new AddItemWithBarcode(display, fakeStock(), sale)
 
             await addItem.onReadBarcode('')
 
@@ -86,10 +88,10 @@ describe('AddItemWithBarcode', () => {
                 price: () => 10.90,
                 asString: () => '10,90€',
             }
-            const addItem = new AddItemWithBarcode(display, getStock(foundItem), new Sale(display))
+            const addItem = new AddItemWithBarcode(display, getStock(foundItem), sale)
 
             await addItem.onReadBarcode('123')
-            addItem.total()
+            sale.total()
 
             expect(display.addTotal).to.have.been.calledWith(`TOTAL: ${ foundItem.asString() }`)
         })
@@ -99,18 +101,16 @@ describe('AddItemWithBarcode', () => {
                 price: () => 10.05,
                 asString: () => '10,05€',
             }
-            const addItem = new AddItemWithBarcode(display, getStock(foundItem), new Sale(display))
+            const addItem = new AddItemWithBarcode(display, getStock(foundItem), sale)
 
             await addItem.onReadBarcode('123')
-            addItem.total()
+            sale.total()
 
             expect(display.addTotal).to.have.been.calledWith(`TOTAL: ${ foundItem.asString() }`)
         })
 
         it('shows error, if no products', () => {
-            const addItem = new AddItemWithBarcode(display, fakeStock(), new Sale(display))
-
-            addItem.total()
+            sale.total()
 
             expect(display.addError).to.have.been.calledWith('No Scanned Products')
             expect(display.addTotal).to.not.have.been.called
@@ -127,11 +127,12 @@ describe('AddItemWithBarcode', () => {
             }
             it('sums up the total', async () => {
                 const stock = fakeStock().on('123').returns(item123).on('234').returns(item234)
-                const addItem = new AddItemWithBarcode(display, stock, new Sale(display))
+                const addItem = new AddItemWithBarcode(display, stock, sale)
 
                 await addItem.onReadBarcode('123')
                 await addItem.onReadBarcode('234')
-                addItem.total()
+
+                sale.total()
 
                 expect(display.addTotal).to.have.been.calledWith('TOTAL: 12,00€')
             })
