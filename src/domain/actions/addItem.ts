@@ -11,18 +11,15 @@ export interface Result<L, R> {
     right: R;
 }
 
-// export const ofError: <L>(x: L) => Result<L, null> = left => ({ left, rigth: null})
-
 function isError<T extends BarCodeReadErrorType>(result: any): result is BarCodeReadError<T> {
     return ('_type' in result) && result._type === BarCodeReadErrorType.EmptyBarcode
 }
 
 export class AddItemWithBarcode implements AddItem {
-    // TODO: Not really a display, but something that plays role of 'I want to know when an item is added'
     private items: Item[]
     private sale: Sale
 
-    public constructor(private readonly display: ListensToSaleEvents, private readonly stock: Stock) {
+    public constructor(private readonly listensToSaleEvents: ListensToSaleEvents, private readonly stock: Stock) {
         this.items = []
         this.sale = new Sale([])
     }
@@ -30,22 +27,22 @@ export class AddItemWithBarcode implements AddItem {
     public async onReadBarcode(barCode: string) {
         const item = await this.stock.findItem(barCode)
         if (isError<BarCodeReadErrorType.EmptyBarcode>(item)) {
-            this.display.addError('Empty barcode')
+            this.listensToSaleEvents.addError('Empty barcode')
         } else {
             this.sale.add(item)
 
             this.items.push(item)
-            await this.display.addPrice(item.asString())
+            await this.listensToSaleEvents.addPrice(item.asString())
         }
     }
 
     public total() {
         if (this.items.length === 0) {
-            this.display.addError('No Scanned Products')
+            this.listensToSaleEvents.addError('No Scanned Products')
 
         } else {
             const { euros, centsStr } = this.sale.getMoney()
-            this.display.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
+            this.listensToSaleEvents.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
         }
     }
 }
@@ -82,7 +79,6 @@ class Price {
     public plus( other: Price): Price {
         const cents = (this.cents + other.cents) / 100
         const euros = this.euros + other.euros
-        // const eurosFromCents = this.getEuros(cents / 100)
         return new Price( euros + cents)
     }
 
