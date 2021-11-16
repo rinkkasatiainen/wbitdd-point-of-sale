@@ -38,11 +38,9 @@ export class AddItemWithBarcode implements AddItem {
 
     public total() {
         if (this.items.length === 0) {
-            this.listensToSaleEvents.addError('No Scanned Products')
-
+            this.sale.total(this.listensToSaleEvents)
         } else {
-            const { euros, centsStr } = this.sale.getMoney()
-            this.listensToSaleEvents.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
+            this.sale.total(this.listensToSaleEvents)
         }
     }
 }
@@ -51,16 +49,25 @@ class Sale {
     private readonly prices: Price[]
 
     public constructor(public readonly items: Item[]) {
-        this.prices = items.map( i => new Price(i.price()))
+        this.prices = items.map(i => new Price(i.price()))
     }
 
-    public getMoney( ){
-        const t = this.prices.reduce ( (p, curr) => p.plus(curr), new Price(0))
+    public getMoney() {
+        const t = this.prices.reduce((p, curr) => p.plus(curr), new Price(0))
         return { euros: t.euros, centsStr: t.centsStr }
     }
 
     public add(item: Item) {
-        this.prices.push( new Price(item.price()))
+        this.prices.push(new Price(item.price()))
+    }
+
+    public total(listensToSaleEvents: ListensToSaleEvents): void {
+        if (this.prices.length === 0) {
+            listensToSaleEvents.addError('No Scanned Products')
+        } else {
+            const { euros, centsStr } = this.getMoney()
+            listensToSaleEvents.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
+        }
     }
 }
 
@@ -76,10 +83,10 @@ class Price {
         this.euros = this.getEuros(price)
     }
 
-    public plus( other: Price): Price {
+    public plus(other: Price): Price {
         const cents = (this.cents + other.cents) / 100
         const euros = this.euros + other.euros
-        return new Price( euros + cents)
+        return new Price(euros + cents)
     }
 
     private getEuros(price: number) {
