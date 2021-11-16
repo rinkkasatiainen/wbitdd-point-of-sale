@@ -24,11 +24,7 @@ export class AddItemWithBarcode implements AddItem {
 
     public async onReadBarcode(barCode: string) {
         const item = await this.stock.findItem(barCode)
-        if (isError<BarCodeReadErrorType.EmptyBarcode>(item)) {
-            this.sale.add(item)
-        } else {
-            this.sale.add(item)
-        }
+        this.sale.add(item)
     }
 
     public total() {
