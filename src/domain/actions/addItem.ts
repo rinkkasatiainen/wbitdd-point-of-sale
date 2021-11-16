@@ -40,11 +40,45 @@ export class AddItemWithBarcode implements AddItem {
             this.display.addError('No Scanned Products')
 
         } else {
-            const total = this.items.map(i => i.price()).reduce((carry, curr) => carry + curr, 0)
-            const cents = (total * 100) % 100
-            const euros = ((total * 100) - cents) / 100
-            const centsStr = cents.toPrecision(2).split('.').join('')
+            const { euros, centsStr } = new Something(this.items).getMoney()
             this.display.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
         }
+    }
+}
+
+class Something {
+    private readonly prices: Price[]
+
+    public constructor(public readonly items: Item[]) {
+        this.prices = items.map( i => new Price(i.price()))
+    }
+
+    public getMoney( ){
+        const t = this.prices.reduce ( (p, curr) => p.plus(curr), new Price(0))
+        return { euros: t.euros, centsStr: t.centsStr }
+    }
+}
+
+
+class Price {
+    public readonly cents: number
+    public readonly euros: number
+    public readonly centsStr: string
+
+    public constructor(price: number) {
+        this.cents = (price * 100) % 100
+        this.centsStr = this.cents.toPrecision(2).split('.').join('')
+        this.euros = this.getEuros(price)
+    }
+
+    public plus( other: Price): Price {
+        const cents = (this.cents + other.cents) / 100
+        const euros = this.euros + other.euros
+        // const eurosFromCents = this.getEuros(cents / 100)
+        return new Price( euros + cents)
+    }
+
+    private getEuros(price: number) {
+        return ((price * 100) - this.cents) / 100
     }
 }

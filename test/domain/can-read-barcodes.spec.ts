@@ -29,7 +29,7 @@ const fakeStock: (items?: Record<string, EmptyBarCode | Item>) => FakeStock =
         })),
     })
 
-function getDisplay() {
+function getDisplay(): ListensToSaleEvents {
     return {
         addError: sinon.spy(),
         addPrice: sinon.spy(),
