@@ -36,10 +36,15 @@ export class AddItemWithBarcode implements AddItem {
     }
 
     public total() {
-        const total = this.items.map(i => i.price()).reduce((carry, curr) => carry + curr, 0)
-        const cents = (total * 100) % 100
-        const euros = ((total * 100) - cents) / 100
-        const centsStr = cents.toPrecision(2).split('.').join('')
-        this.display.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
+        if (this.items.length === 0) {
+            this.display.addError('No Scanned Products')
+
+        } else {
+            const total = this.items.map(i => i.price()).reduce((carry, curr) => carry + curr, 0)
+            const cents = (total * 100) % 100
+            const euros = ((total * 100) - cents) / 100
+            const centsStr = cents.toPrecision(2).split('.').join('')
+            this.display.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
+        }
     }
 }

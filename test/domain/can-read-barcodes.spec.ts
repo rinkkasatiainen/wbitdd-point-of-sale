@@ -14,10 +14,10 @@ interface FakeStock extends Stock {
 }
 
 const fakeStock: (items?: Record<string, EmptyBarCode | Item>) => FakeStock =
-    (items= {}) => ({
+    (items = {}) => ({
         findItem: (actual) => {
-            if (actual === ''){
-                return Promise.resolve( new EmptyBarCode() )
+            if (actual === '') {
+                return Promise.resolve(new EmptyBarCode())
             }
             if (actual in items) {
                 return Promise.resolve(items[actual])
@@ -29,46 +29,51 @@ const fakeStock: (items?: Record<string, EmptyBarCode | Item>) => FakeStock =
         })),
     })
 
+function getDisplay() {
+    return {
+        addError: sinon.spy(),
+        addPrice: sinon.spy(),
+        addTotal: sinon.spy(),
+    }
+}
+
 describe('AddItemWithBarcode', () => {
     let display: LCDDisplay
-
     beforeEach(() => {
-        display = {
-            addError: sinon.spy(),
-            addPrice: sinon.spy(),
-            addTotal: sinon.spy(),
-        }
+        display = getDisplay()
     })
 
-    it('gets and item and sends the price to display', async () => {
-        const item: Item = {
-            price: () => 1.89,
-            asString: () => '1,89€',
-        }
-        const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(item))
+    describe('Reading barcodes', () => {
+        it('gets and item and sends the price to display', async () => {
+            const item: Item = {
+                price: () => 1.89,
+                asString: () => '1,89€',
+            }
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(item))
 
-        await addItem.onReadBarcode('123')
+            await addItem.onReadBarcode('123')
 
-        expect(display.addPrice).to.have.been.calledWith('1,89€')
-    })
+            expect(display.addPrice).to.have.been.calledWith('1,89€')
+        })
 
-    it('when there are no items', async () => {
+        it('when there are no items', async () => {
 
-        const noItemFound = new NoItemFound('321')
+            const noItemFound = new NoItemFound('321')
 
-        const addItem = new AddItemWithBarcode(display, fakeStock().on('321').returns(noItemFound))
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('321').returns(noItemFound))
 
-        await addItem.onReadBarcode('321')
+            await addItem.onReadBarcode('321')
 
-        expect(display.addPrice).to.have.been.calledWith('Product not found: 321')
-    })
+            expect(display.addPrice).to.have.been.calledWith('Product not found: 321')
+        })
 
-    it('displays EmptyBarCodeError', async () => {
-        const addItem = new AddItemWithBarcode(display, fakeStock())
+        it('displays EmptyBarCodeError', async () => {
+            const addItem = new AddItemWithBarcode(display, fakeStock())
 
-        await addItem.onReadBarcode('')
+            await addItem.onReadBarcode('')
 
-        expect(display.addError).to.have.been.calledWith('Empty barcode')
+            expect(display.addError).to.have.been.calledWith('Empty barcode')
+        })
     })
 
     describe('calculates total', () => {
@@ -100,6 +105,14 @@ describe('AddItemWithBarcode', () => {
             expect(display.addTotal).to.have.been.calledWith(`TOTAL: ${ foundItem.asString() }`)
         })
 
+        it('shows error, if no products', () => {
+            const addItem = new AddItemWithBarcode(display, fakeStock())
+
+            addItem.total()
+
+            expect(display.addError).to.have.been.calledWith('No Scanned Products')
+            expect(display.addTotal).to.not.have.been.called
+        })
 
         describe('with multiple items', () => {
             const item123: Item = {
@@ -120,6 +133,9 @@ describe('AddItemWithBarcode', () => {
 
                 expect(display.addTotal).to.have.been.calledWith('TOTAL: 12,00€')
             })
+
         })
+
+
     })
 })
