@@ -1,4 +1,4 @@
-import { BarCodeReadError, BarCodeReadErrorType, Item } from './repository/stock'
+import { BarCodeReadError, BarCodeReadErrorType, Item, NoItemFound } from './repository/stock'
 import { ListensToSaleEvents } from './output/ListensToSaleEvents'
 import { Price } from './price'
 
@@ -17,8 +17,10 @@ export class Sale {
         if (isError(item)) {
             this.listensToSaleEvents.addError('Empty barcode')
         } else {
-            this.prices.push(new Price(item.price()))
             await this.listensToSaleEvents.addPrice(item.asString())
+            if (!(item instanceof NoItemFound)) {
+                this.prices.push(new Price(item.price()))
+            }
         }
     }
 
@@ -27,7 +29,7 @@ export class Sale {
             this.listensToSaleEvents.addError('No Scanned Products')
         } else {
             const price = this.calculateTotal()
-            this.listensToSaleEvents.addTotal(`TOTAL: ${price.asString()}€`)
+            this.listensToSaleEvents.addTotal(`TOTAL: ${ price.asString() }€`)
         }
     }
 

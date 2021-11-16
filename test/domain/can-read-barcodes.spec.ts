@@ -16,14 +16,14 @@ interface FakeStock extends Stock {
 
 const fakeStock: (items?: Record<string, EmptyBarCode | Item>) => FakeStock =
     (items = {}) => ({
-        findItem: (actual) => {
-            if (actual === '') {
+        findItem: (barcode) => {
+            if (barcode === '') {
                 return Promise.resolve(new EmptyBarCode())
             }
-            if (actual in items) {
-                return Promise.resolve(items[actual])
+            if (barcode in items) {
+                return Promise.resolve(items[barcode])
             }
-            throw new Error('Stock empty')
+            return Promise.resolve(new NoItemFound(barcode))
         },
         on: (barcode => ({
             returns: (item: Item | NoItemFound) => fakeStock({ ...items, [barcode]: item }),
@@ -81,14 +81,12 @@ describe('AddItemWithBarcode', () => {
     })
 
     describe('calculates total', () => {
-        const getStock = (foundItem: Item) => fakeStock().on('123').returns(foundItem)
-
         it('with one product', async () => {
             const foundItem: Item = {
                 price: () => 10.90,
                 asString: () => '10,90€',
             }
-            const addItem = new AddItemWithBarcode(display, getStock(foundItem), sale)
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(foundItem), sale)
 
             await addItem.onReadBarcode('123')
             sale.total()
@@ -101,7 +99,7 @@ describe('AddItemWithBarcode', () => {
                 price: () => 10.05,
                 asString: () => '10,05€',
             }
-            const addItem = new AddItemWithBarcode(display, getStock(foundItem), sale)
+            const addItem = new AddItemWithBarcode(display, fakeStock().on('123').returns(foundItem), sale)
 
             await addItem.onReadBarcode('123')
             sale.total()
@@ -110,6 +108,16 @@ describe('AddItemWithBarcode', () => {
         })
 
         it('shows error, if no products', () => {
+            sale.total()
+
+            expect(display.addError).to.have.been.calledWith('No Scanned Products')
+            expect(display.addTotal).to.not.have.been.called
+        })
+
+        it('shows error, if no products', async () => {
+            const addItem = new AddItemWithBarcode(display, fakeStock(), sale)
+
+            await addItem.onReadBarcode('123')
             sale.total()
 
             expect(display.addError).to.have.been.calledWith('No Scanned Products')
@@ -138,4 +146,12 @@ describe('AddItemWithBarcode', () => {
             })
         })
     })
+
+    // 0, 1, many, ∞, 💥
+    it('should print total even if one item is not found')
+    it('can be possible to override price of an item')
+    it('pressing total when no items read, should not do a thing')
+    it('when empty barcode!')
+    it('should notify if product is not found')
+
 })
