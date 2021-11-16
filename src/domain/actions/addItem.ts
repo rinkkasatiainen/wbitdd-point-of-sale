@@ -7,11 +7,6 @@ export interface AddItem {
     total: () => void;
 }
 
-export interface Result<L, R> {
-    left: L;
-    right: R;
-}
-
 export class AddItemWithBarcode implements AddItem {
     private sale: Sale
 
