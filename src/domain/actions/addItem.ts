@@ -21,7 +21,7 @@ export class AddItemWithBarcode implements AddItem {
 
     public constructor(private readonly listensToSaleEvents: ListensToSaleEvents, private readonly stock: Stock) {
         this.items = []
-        this.sale = new Sale([])
+        this.sale = new Sale([], listensToSaleEvents)
     }
 
     public async onReadBarcode(barCode: string) {
@@ -44,7 +44,7 @@ export class AddItemWithBarcode implements AddItem {
 class Sale {
     private readonly prices: Price[]
 
-    public constructor(public readonly items: Item[]) {
+    public constructor(private readonly items: Item[], private readonly listensToSaleEvents: ListensToSaleEvents) {
         this.prices = items.map(i => new Price(i.price()))
     }
 
@@ -59,10 +59,10 @@ class Sale {
 
     public total(listensToSaleEvents: ListensToSaleEvents): void {
         if (this.prices.length === 0) {
-            listensToSaleEvents.addError('No Scanned Products')
+            this.listensToSaleEvents.addError('No Scanned Products')
         } else {
             const { euros, centsStr } = this.getMoney()
-            listensToSaleEvents.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
+            this.listensToSaleEvents.addTotal(`TOTAL: ${ euros },${ centsStr }€`)
         }
     }
 }
