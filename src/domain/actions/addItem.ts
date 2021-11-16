@@ -37,11 +37,7 @@ export class AddItemWithBarcode implements AddItem {
     }
 
     public total() {
-        if (this.items.length === 0) {
-            this.sale.total(this.listensToSaleEvents)
-        } else {
-            this.sale.total(this.listensToSaleEvents)
-        }
+        this.sale.total(this.listensToSaleEvents)
     }
 }
 
