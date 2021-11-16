@@ -11,10 +11,6 @@ export interface Result<L, R> {
     right: R;
 }
 
-function isError<T extends BarCodeReadErrorType>(result: any): result is BarCodeReadError<T> {
-    return ('_type' in result) && result._type === BarCodeReadErrorType.EmptyBarcode
-}
-
 export class AddItemWithBarcode implements AddItem {
     private sale: Sale
 
@@ -24,12 +20,16 @@ export class AddItemWithBarcode implements AddItem {
 
     public async onReadBarcode(barCode: string) {
         const item = await this.stock.findItem(barCode)
-        this.sale.add(item)
+        await this.sale.add(item)
     }
 
     public total() {
         this.sale.total(this.listensToSaleEvents)
     }
+}
+
+function isError<T extends BarCodeReadErrorType>(result: any): result is BarCodeReadError<T> {
+    return ('_type' in result) && result._type === BarCodeReadErrorType.EmptyBarcode
 }
 
 class Sale {
@@ -44,12 +44,12 @@ class Sale {
         return { euros: t.euros, centsStr: t.centsStr }
     }
 
-    public add(item: Item | BarCodeReadError<BarCodeReadErrorType>) {
+    public async add(item: Item | BarCodeReadError<BarCodeReadErrorType>) {
         if (isError(item)) {
             this.listensToSaleEvents.addError('Empty barcode')
         } else {
             this.prices.push(new Price(item.price()))
-            this.listensToSaleEvents.addPrice(item.asString())
+            await this.listensToSaleEvents.addPrice(item.asString())
         }
     }
 
