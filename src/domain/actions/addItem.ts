@@ -16,11 +16,9 @@ function isError<T extends BarCodeReadErrorType>(result: any): result is BarCode
 }
 
 export class AddItemWithBarcode implements AddItem {
-    private items: Item[]
     private sale: Sale
 
     public constructor(private readonly listensToSaleEvents: ListensToSaleEvents, private readonly stock: Stock) {
-        this.items = []
         this.sale = new Sale(listensToSaleEvents)
     }
 
@@ -30,8 +28,6 @@ export class AddItemWithBarcode implements AddItem {
             this.listensToSaleEvents.addError('Empty barcode')
         } else {
             this.sale.add(item)
-
-            this.items.push(item)
             await this.listensToSaleEvents.addPrice(item.asString())
         }
     }
