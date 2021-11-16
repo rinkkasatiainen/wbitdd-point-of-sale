@@ -1,9 +1,9 @@
 import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import { AddItemWithBarcode, Result } from '../../src/domain/actions/addItem'
-import { Item, NoItemFound, Stock, BarCodeReadError, EmptyBarCode } from '../../src/domain/repository/stock'
-import { LCDDisplay } from '../../src/domain/output/LCDDisplay'
+import { AddItemWithBarcode} from '../../src/domain/actions/addItem'
+import { Item, NoItemFound, Stock, EmptyBarCode } from '../../src/domain/repository/stock'
+import { ListensToSaleEvents } from '../../src/domain/output/ListensToSaleEvents'
 
 chai.use(sinonChai)
 
@@ -38,7 +38,7 @@ function getDisplay() {
 }
 
 describe('AddItemWithBarcode', () => {
-    let display: LCDDisplay
+    let display: ListensToSaleEvents
     beforeEach(() => {
         display = getDisplay()
     })
@@ -133,9 +133,6 @@ describe('AddItemWithBarcode', () => {
 
                 expect(display.addTotal).to.have.been.calledWith('TOTAL: 12,00€')
             })
-
         })
-
-
     })
 })

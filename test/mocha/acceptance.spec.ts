@@ -1,13 +1,13 @@
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
-import { LCDDisplay } from '../../src/domain/output/LCDDisplay'
+import { ListensToSaleEvents } from '../../src/domain/output/ListensToSaleEvents'
 import { AddItem, AddItemWithBarcode } from '../../src/domain/actions/addItem'
-import { NoItemFound, Stock } from '../../src/domain/repository/stock'
+import { Item, NoItemFound, Stock } from '../../src/domain/repository/stock'
 
 chai.use(sinonChai)
 const notCalledEver = '-1.999€'
 
-class TestSpecificLCDDisplay implements LCDDisplay {
+class TestSpecificLCDDisplay implements ListensToSaleEvents {
     private lastPrice: string = notCalledEver
 
     public lastCall() {
@@ -18,22 +18,33 @@ class TestSpecificLCDDisplay implements LCDDisplay {
     public async addPrice(price: string) {
         this.lastPrice = price
     }
+
+    public addError(error: string): void {
+    }
+
+    public addTotal(total: string): void {
+    }
 }
 
-const fakeStockWith: (barcodesByPrice: Record<string, string>) => Stock =
+const fakeStockWith: (barcodesByPrice: Record<string, Item>) => Stock =
     (barcodesByPrice) => ({
         findItem: (barcode: string) => {
             if (barcode in barcodesByPrice) {
-                return Promise.resolve({ asString: () => barcodesByPrice[barcode] })
+                return Promise.resolve(barcodesByPrice[barcode])
             }
             return Promise.resolve(new NoItemFound(barcode))
         },
     })
 
 
+const getItem: (price: number, asString: string) => Item = (price, asString) => ({
+    price: () => price,
+    asString: () => asString,
+})
+
 describe('Point of Sale system', () => {
     it('should print the price in the LCD', async () => {
-        const stock = fakeStockWith({ 12345: '10,50€' })
+        const stock = fakeStockWith({ 12345: getItem(10.50, '10,50€') })
         const lcdDisplay: TestSpecificLCDDisplay = new TestSpecificLCDDisplay()
         const onReadBarcode: AddItem = new AddItemWithBarcode(lcdDisplay, stock)
 
@@ -44,7 +55,7 @@ describe('Point of Sale system', () => {
     })
 
     it('should not print the price of an iteM that is not found', async () => {
-        const stock = fakeStockWith({ 12345: '10.45' })
+        const stock = fakeStockWith({ 12345: getItem(10.50, '10,50€') })
         const lcdDisplay = new TestSpecificLCDDisplay()
         const onReadBarcode = new AddItemWithBarcode(lcdDisplay, stock)
 
@@ -56,12 +67,12 @@ describe('Point of Sale system', () => {
 
     describe('can sell multiple items', () => {
 
-        it.skip('should print the total and individual prices', async () => {
+        it('should print the total and individual prices', async () => {
             const stock = fakeStockWith(
                 {
-                    12345: '10.45',
-                    23456: '1.40',
-                    34567: '81.10',
+                    12345: getItem(10.50, '10,50€'),
+                    23456: getItem(1.40, '1,40€'),
+                    34567: getItem(17.15, '17,05€'),
                 },
             )
             const lcdDisplay = new TestSpecificLCDDisplay()
@@ -82,7 +93,7 @@ describe('Point of Sale system', () => {
         it('should print total even if one item is not found')
         it('can be possible to override price of an item')
         it('pressing total when no items read, should not do a thing')
-        it( 'when empty barcode!')
+        it('when empty barcode!')
         it('should notify if product is not found')
     })
 })

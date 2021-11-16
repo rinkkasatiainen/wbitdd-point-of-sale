@@ -1,4 +1,4 @@
-import { LCDDisplay } from '../output/LCDDisplay'
+import { ListensToSaleEvents } from '../output/ListensToSaleEvents'
 import { BarCodeReadError, BarCodeReadErrorType, Item, Stock } from '../repository/stock'
 
 export interface AddItem {
@@ -21,7 +21,7 @@ export class AddItemWithBarcode implements AddItem {
     // TODO: Not really a display, but something that plays role of 'I want to know when an item is added'
     private items: Item[]
 
-    public constructor(private readonly display: LCDDisplay, private readonly stock: Stock) {
+    public constructor(private readonly display: ListensToSaleEvents, private readonly stock: Stock) {
         this.items = []
     }
 
