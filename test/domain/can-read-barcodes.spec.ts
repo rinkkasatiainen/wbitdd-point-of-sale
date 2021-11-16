@@ -1,8 +1,8 @@
 import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import { AddItemWithBarcode } from '../../src/domain/actions/addItem'
-import { Item, NoItemFound, Stock } from '../../src/domain/repository/stock'
+import { AddItemWithBarcode, Result } from '../../src/domain/actions/addItem'
+import { Item, NoItemFound, Stock, BarCodeReadError, EmptyBarCode } from '../../src/domain/repository/stock'
 import { LCDDisplay } from '../../src/domain/output/LCDDisplay'
 
 chai.use(sinonChai)
@@ -13,9 +13,12 @@ interface FakeStock extends Stock {
     };
 }
 
-const fakeStock: (items?: Record<string, Item | NoItemFound>) => FakeStock =
-    (items: Record<string, Item | NoItemFound> = {}) => ({
+const fakeStock: (items?: Record<string, EmptyBarCode | Item>) => FakeStock =
+    (items= {}) => ({
         findItem: (actual) => {
+            if (actual === ''){
+                return Promise.resolve( new EmptyBarCode() )
+            }
             if (actual in items) {
                 return Promise.resolve(items[actual])
             }
@@ -31,6 +34,7 @@ describe('AddItemWithBarcode', () => {
 
     beforeEach(() => {
         display = {
+            addError: sinon.spy(),
             addPrice: sinon.spy(),
             addTotal: sinon.spy(),
         }
@@ -59,6 +63,13 @@ describe('AddItemWithBarcode', () => {
         expect(display.addPrice).to.have.been.calledWith('Product not found: 321')
     })
 
+    it('displays EmptyBarCodeError', async () => {
+        const addItem = new AddItemWithBarcode(display, fakeStock())
+
+        await addItem.onReadBarcode('')
+
+        expect(display.addError).to.have.been.calledWith('Empty barcode')
+    })
 
     describe('calculates total', () => {
         const getStock = (foundItem: Item) => fakeStock().on('123').returns(foundItem)

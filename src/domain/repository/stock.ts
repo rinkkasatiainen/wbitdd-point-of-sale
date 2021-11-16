@@ -1,6 +1,19 @@
 export interface Item {
-    price: () => number
+    price: () => number;
     asString: () => string;
+}
+
+export enum BarCodeReadErrorType {
+    EmptyBarcode = 'EmptyBarcode'
+}
+export interface BarCodeReadError<T extends BarCodeReadErrorType> { _type: T}
+
+export class EmptyBarCode implements BarCodeReadError<BarCodeReadErrorType.EmptyBarcode>{
+    public _type: BarCodeReadErrorType.EmptyBarcode
+
+    public constructor() {
+        this._type = BarCodeReadErrorType.EmptyBarcode
+    }
 }
 
 export class NoItemFound implements Item{
@@ -14,6 +27,6 @@ export class NoItemFound implements Item{
 }
 
 export interface Stock {
-    findItem: (barcode: string) => Promise<Item>;
+    findItem: (barcode: string) => Promise<Item | BarCodeReadError<BarCodeReadErrorType>>;
 
 }

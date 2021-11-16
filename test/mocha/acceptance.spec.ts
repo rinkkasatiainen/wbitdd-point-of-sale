@@ -83,6 +83,7 @@ describe('Point of Sale system', () => {
         it('can be possible to override price of an item')
         it('pressing total when no items read, should not do a thing')
         it( 'when empty barcode!')
+        it('should notify if product is not found')
     })
 })
 
