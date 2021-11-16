@@ -1,9 +1,9 @@
-import chai, {expect} from 'chai'
+import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import {AddItemWithBarcode} from '../../src/domain/actions/addItem'
-import {Item, NoItemFound, Stock} from '../../src/domain/repository/stock'
-import {LCDDisplay} from '../../src/domain/output/LCDDisplay'
+import { AddItemWithBarcode } from '../../src/domain/actions/addItem'
+import { Item, NoItemFound, Stock } from '../../src/domain/repository/stock'
+import { LCDDisplay } from '../../src/domain/output/LCDDisplay'
 
 chai.use(sinonChai)
 
@@ -58,27 +58,31 @@ describe('AddItemWithBarcode', () => {
 
 
     describe('calculates total', () => {
+        const getAddItemWithBarcode = (foundItem: Item) =>
+            new AddItemWithBarcode(display, fakeStock.on('123').returns(foundItem))
+
         it('with one product', async () => {
             const foundItem: Item = {
                 asString: () => '10,90€',
             }
-            const addItem = new AddItemWithBarcode(display, fakeStock.on('123').returns(foundItem))
+            const addItem = getAddItemWithBarcode(foundItem)
 
             await addItem.onReadBarcode('123')
 
             const total = addItem.total()
-            expect( total ).to.eql( `TOTAL: ${foundItem.asString()}`)
+            expect(total).to.eql(`TOTAL: ${ foundItem.asString() }`)
         })
+
         it('with another product', async () => {
             const foundItem: Item = {
                 asString: () => '10,90€',
             }
-            const addItem = new AddItemWithBarcode(display, fakeStock.on('123').returns(foundItem))
+            const addItem = getAddItemWithBarcode(foundItem)
 
             await addItem.onReadBarcode('123')
 
             const total = addItem.total()
-            expect( total ).to.eql( `TOTAL: ${foundItem.asString()}`)
+            expect(total).to.eql(`TOTAL: ${ foundItem.asString() }`)
         })
 
     })
