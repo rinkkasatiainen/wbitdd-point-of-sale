@@ -3,7 +3,7 @@ import {Item, Stock} from '../repository/stock'
 
 export interface AddItem {
     onReadBarcode: (barCode: string) => Promise<void>;
-    total: () => string;
+    total: () => void;
 }
 
 export class AddItemWithBarcode implements AddItem {
@@ -24,6 +24,6 @@ export class AddItemWithBarcode implements AddItem {
         const cents = (total * 100) % 100
         const euros = ((total * 100) - cents ) / 100
         const centsStr = cents.toPrecision(2).split('.').join('')
-        return `TOTAL: ${euros},${centsStr}€`
+        this.display.addTotal( `TOTAL: ${euros},${centsStr}€`)
     }
 }

@@ -32,6 +32,7 @@ describe('AddItemWithBarcode', () => {
     beforeEach(() => {
         display = {
             addPrice: sinon.spy(),
+            addTotal: sinon.spy(),
         }
     })
 
@@ -70,9 +71,9 @@ describe('AddItemWithBarcode', () => {
             const addItem = new AddItemWithBarcode(display, getStock(foundItem))
 
             await addItem.onReadBarcode('123')
+            addItem.total()
 
-            const total = addItem.total()
-            expect(total).to.eql(`TOTAL: ${ foundItem.asString() }`)
+            expect(display.addTotal).to.have.been.calledWith(`TOTAL: ${ foundItem.asString() }`)
         })
 
         it('with another product', async () => {
@@ -83,9 +84,9 @@ describe('AddItemWithBarcode', () => {
             const addItem = new AddItemWithBarcode(display, getStock(foundItem))
 
             await addItem.onReadBarcode('123')
+            addItem.total()
 
-            const total = addItem.total()
-            expect(total).to.eql(`TOTAL: ${ foundItem.asString() }`)
+            expect(display.addTotal).to.have.been.calledWith(`TOTAL: ${ foundItem.asString() }`)
         })
 
 
@@ -104,11 +105,9 @@ describe('AddItemWithBarcode', () => {
 
                 await addItem.onReadBarcode('123')
                 await addItem.onReadBarcode('234')
+                addItem.total()
 
-                const total = addItem.total()
-
-                expect(total).to.eql('TOTAL: 12,00€')
-
+                expect(display.addTotal).to.have.been.calledWith('TOTAL: 12,00€')
             })
         })
     })
