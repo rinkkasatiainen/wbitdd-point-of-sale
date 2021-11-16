@@ -25,10 +25,9 @@ export class AddItemWithBarcode implements AddItem {
     public async onReadBarcode(barCode: string) {
         const item = await this.stock.findItem(barCode)
         if (isError<BarCodeReadErrorType.EmptyBarcode>(item)) {
-            this.listensToSaleEvents.addError('Empty barcode')
+            this.sale.add(item)
         } else {
             this.sale.add(item)
-            await this.listensToSaleEvents.addPrice(item.asString())
         }
     }
 
@@ -49,8 +48,13 @@ class Sale {
         return { euros: t.euros, centsStr: t.centsStr }
     }
 
-    public add(item: Item) {
-        this.prices.push(new Price(item.price()))
+    public add(item: Item | BarCodeReadError<BarCodeReadErrorType>) {
+        if (isError(item)) {
+            this.listensToSaleEvents.addError('Empty barcode')
+        } else {
+            this.prices.push(new Price(item.price()))
+            this.listensToSaleEvents.addPrice(item.asString())
+        }
     }
 
     public total(listensToSaleEvents: ListensToSaleEvents): void {

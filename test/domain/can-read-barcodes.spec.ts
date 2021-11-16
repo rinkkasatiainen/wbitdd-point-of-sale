@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import { AddItemWithBarcode} from '../../src/domain/actions/addItem'
+import { AddItemWithBarcode } from '../../src/domain/actions/addItem'
 import { Item, NoItemFound, Stock, EmptyBarCode } from '../../src/domain/repository/stock'
 import { ListensToSaleEvents } from '../../src/domain/output/ListensToSaleEvents'
 
