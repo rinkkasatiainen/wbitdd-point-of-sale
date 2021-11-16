@@ -14,7 +14,7 @@ export interface Result<L, R> {
 export class AddItemWithBarcode implements AddItem {
     private sale: Sale
 
-    public constructor(private readonly listensToSaleEvents: ListensToSaleEvents, private readonly stock: Stock) {
+    public constructor(listensToSaleEvents: ListensToSaleEvents, private readonly stock: Stock) {
         this.sale = new Sale(listensToSaleEvents)
     }
 
@@ -24,7 +24,7 @@ export class AddItemWithBarcode implements AddItem {
     }
 
     public total() {
-        this.sale.total(this.listensToSaleEvents)
+        this.sale.total()
     }
 }
 
@@ -53,7 +53,7 @@ class Sale {
         }
     }
 
-    public total(listensToSaleEvents: ListensToSaleEvents): void {
+    public total(): void {
         if (this.prices.length === 0) {
             this.listensToSaleEvents.addError('No Scanned Products')
         } else {
